@@ -1,29 +1,34 @@
-export default function Post({ params }: { params: { postId: string } }) {
+export async function generateStaticParams() {
+    const response = await fetch('https://dummyjson.com/posts');
+    const data = await response.json();
 
-    const dummyPost = {
-        id: params.postId,
-        title: 'My First Blog Post',
-        body: 'This is the content of the blog post. It provides information on various topics and engages readers with interesting content. Enjoy reading this sample post!',
-        likes: 120,
-        dislikes: 10,
-        views: 450,
-    };
+    return data.posts.map((posts: { id: number}) => ({
+        postId: posts.id.toString(),
+    }));
+}
+
+export default async function Post(props: { params: { postId: string } }) {
+
+    const { postId } = props.params;
+
+    const response = await fetch(`https://dummyjson.com/posts/${postId}`);
+    const post = await response.json();
 
     return (
         <div>
             <header>
-                <h1>{dummyPost.title}</h1>
+                <h1>{post.title}</h1>
             </header>
             <main>
                 <div>
                     <h2>About this post</h2>
-                    <p>{dummyPost.body}</p>
-                    <p>{dummyPost.id}</p>
+                    <p>{post.body}</p>
+                    <p>{post.id}</p>
                 </div>
                 <div>
-                    <p>Likes: {dummyPost.likes}</p>
-                    <p>Dislikes: {dummyPost.dislikes}</p>
-                    <p>Views: {dummyPost.views}</p>
+                    <p>Likes: {post.reactions.likes}</p>
+                    <p>Dislikes: {post.reactions.dislikes}</p>
+                    <p>Views: {post.views}</p>
                 </div>
             </main>
         </div>
